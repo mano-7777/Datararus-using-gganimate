@@ -1,0 +1,47 @@
+---
+title: "animate"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Your First Animation
+```{r}
+library(gganimate)
+library(ggplot2)
+#> Loading required package: ggplot2
+# We'll start with a static plot
+p <- ggplot(iris,aes(Petal.Width,Petal.Length))+geom_point()+theme_bw()
+print(p)
+```
+❗ transition_states() splits up plot data by a discrete variable and animates between the different states.
+Transitions are functions that interpret the plot data in order to somehow distribute it over a number of frames. transition_states()
+```{r}
+anim <- p+transition_states(Species,transition_length = 2,state_length = 1)
+animate(anim)
+```
+Easing
+When transition_states() calculates intermediary data for the tweening, it needs to decide how the change from one value to another should progress. This is a concept called easing. The default easing is linear, but others can be used, potentially only targeting specific aesthetics. Setting easing is done with the ease_aes() function. The first argument sets the default easing and subsequent named arguments sets it for specific aesthetics.
+
+
+
+```{r}
+anim <- anim+ease_aes(y='bounce-in')
+animate(anim)
+```
+```{r}
+anim <- anim+ease_aes('circular-in-out')
+# Slow start and end for a smoother look
+animate(anim)
+```
+Enter and Exit
+While we may have made our animation more correct by separating the data from the different species, we have also made it quite a bit more boring. Now it simply appears as three static plots shown one at a time, which is hardly an attention grabber. If only there were a way to animate the appearance and disappearance of data…
+
+Enter the enter and exit functions. These functions are responsible for modifying the state of appearing (entering) and disappearing (exiting) data, so that the animation can tween from and to the new state. Let’s spice up our animation a bit:
+```{r}
+anim <- ggplot(iris,aes(Petal.Width,Petal.Length))+geom_point(aes(color=Species),size=2)+transition_states(Species,transition_length = 2,
+                    state_length = 1)
+anim+enter_fade()+exit_disappear()
+```
+
